@@ -2,19 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridGenerator : MonoBehaviour {
+public class MapGenerator : MonoBehaviour {
     public GameObject nodePrefab;
+
+    public Vector3 nodeDimentions;
+
+    
+
     public Vector3 dimentions;
-  
+        
     public Vector3 separation;
-    private Vector3 carretPos;
 
+    [SerializeField]
+    private Texture2D mapImage;
+    
+
+    [HideInInspector]
     public List<Node> nodes;
-    private GameObject AllNodes;
 
+    public GameObject baseCell;
+    [SerializeField]
+    public List<Path> paths;
+   
+    private GameObject AllNodes;
+    private Vector3 carretPos;
     [ContextMenu("Generate Blank Grid")]
-    List<Node> GenerateBlankGrid()
+    public List<Node> GenerateBlankGrid()
     {
+        nodePrefab.transform.localScale = nodeDimentions;
         AllNodes = new GameObject("Nodes");
         AllNodes.transform.SetParent(this.transform);
         nodes = new List<Node>();
@@ -22,11 +37,11 @@ public class GridGenerator : MonoBehaviour {
         GameObject newNodeGO;
         Vector3 carretInitalPos = transform.position + newNode.GetSize() / 2;
         carretPos = carretInitalPos;
-        for (int k = 0; k < dimentions.z; k++)
+        for (int k = 0; k < (int)dimentions.z; k++)
         {
-            for (int j = 0; j < dimentions.y; j++)
+            for (int j = 0; j < (int)dimentions.y; j++)
             {
-                for (int i = 0; i < dimentions.x; i++)
+                for (int i = 0; i < (int)dimentions.x; i++)
                 {
                     newNodeGO = Instantiate<GameObject>(nodePrefab, carretPos, Quaternion.identity,AllNodes.transform);
                     nodes.Add(newNodeGO.GetComponent<Node>());
@@ -42,13 +57,29 @@ public class GridGenerator : MonoBehaviour {
     }
 
     [ContextMenu("Clean Grid")]
-    void CleanGrid()
+    public void CleanGrid()
     {
-        if(AllNodes != null)
+        nodes.Clear();
+        
+        baseCell = null;
+        if (AllNodes != null)
         {
+            
             DestroyImmediate(AllNodes);
         }
     }
 
+    public void SelectBase(GameObject go)
+    {
+        baseCell = go;
+    }
+   
+
+    public void CreatePath(Path path)
+    {
+        if(paths == null)
+            paths = new List<Path>();        
+        paths.Add(path);
+    }
 
 }
