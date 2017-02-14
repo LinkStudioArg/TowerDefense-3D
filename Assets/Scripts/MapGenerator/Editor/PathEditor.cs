@@ -6,9 +6,11 @@ public class PathEditor : EditorWindow {
     Path path;    
     GameObject SelectedGo;
     GameObject aux;
-    public void Init(Path p)
+    MapGenerator gen;
+    public void Init(MapGenerator gen)
     {
-        path = p;
+        this.gen = gen;
+        path = new Path();
         if (Selection.activeTransform.gameObject.GetComponent<Node>() != null)
         {
             SelectedGo = Selection.activeTransform.gameObject;
@@ -46,12 +48,23 @@ public class PathEditor : EditorWindow {
             {
                 GeneratePathToObject(SelectedGo);
                 SceneView.RepaintAll();
+                
+            }
+            if (GUILayout.Button("Save Path"))
+            {
+                SavePath();
             }
         }
 
         
     }
+    void SavePath()
 
+    {
+        gen.CreatePath(path);
+        EditorUtility.SetDirty(gen);
+    }
+    
     void GeneratePathToObject(GameObject selected)
     {
         if (aux != SelectedGo)

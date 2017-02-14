@@ -9,8 +9,34 @@ public class MapGeneratorEditor : Editor
     PathEditor window;
     static bool created = false;
     MapGenerator myScript;
+
+    void OnLostFocus()
+    {
+        EditorPrefs.SetBool("created", created);
+        EditorPrefs.SetBool("display", display);
+    }
+
+    void OnDestroy()
+    {
+        EditorPrefs.SetBool("created", created);
+        EditorPrefs.SetBool("display", display);
+    }
+    void GetValues()
+    {
+        if (EditorPrefs.HasKey("created"))
+            created = EditorPrefs.GetBool("created");
+        if (EditorPrefs.HasKey("display"))
+            display = EditorPrefs.GetBool("display");
+    }
+
+    public void Awake()
+    {
+        GetValues();
+
+    }
     public override void OnInspectorGUI()
     {
+        
         myScript = (MapGenerator)target;
         
         if (Selection.activeTransform != null)
@@ -35,8 +61,10 @@ public class MapGeneratorEditor : Editor
         {
             if (GUILayout.Button("Generate Blank Grid"))
             {
+                
                 myScript.GenerateBlankGrid();
                 created = true;
+                EditorUtility.SetDirty(myScript);
             }
         }
         if (created == true)
@@ -45,6 +73,7 @@ public class MapGeneratorEditor : Editor
             {
                 myScript.CleanGrid();
                 created = false;
+                EditorUtility.SetDirty(myScript);
             }
         }
         if (SelectedGo)
@@ -52,16 +81,19 @@ public class MapGeneratorEditor : Editor
             if (GUILayout.Button("Select as Base"))
             {
                 myScript.SelectBase(SelectedGo);
+                EditorUtility.SetDirty(myScript);
             }
             if (GUILayout.Button("Create Path"))
             {
-                Path newPath = new Path();
-                myScript.CreatePath(newPath);
+                
+                //myScript.CreatePath();
                 
                 window = ScriptableObject.CreateInstance<PathEditor>();
                 window.position = new Rect(Screen.width / 2, Screen.height / 2, 250, 150);
-                window.Init(newPath);
+                window.Init(myScript);
                 window.Show();
+                
+                
             }
         }
 
@@ -70,11 +102,9 @@ public class MapGeneratorEditor : Editor
             if (GUILayout.Button("Display PathLines"))
             {
                 display = !display;
-                SceneView.RepaintAll();
+                
             }
         }
-        
-
     }
     private void OnSceneGUI()
     {
