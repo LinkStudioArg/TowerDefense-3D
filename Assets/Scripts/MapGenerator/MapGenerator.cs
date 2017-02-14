@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class MapGenerator : MonoBehaviour {
     public GameObject nodePrefab;
 
@@ -13,8 +13,7 @@ public class MapGenerator : MonoBehaviour {
         
     public Vector3 separation;
 
-    [SerializeField]
-    private Texture2D mapImage;
+   
     
 
     [HideInInspector]
@@ -60,7 +59,7 @@ public class MapGenerator : MonoBehaviour {
     public void CleanGrid()
     {
         nodes.Clear();
-        
+        paths.Clear();
         baseCell = null;
         if (AllNodes != null)
         {
@@ -82,4 +81,5 @@ public class MapGenerator : MonoBehaviour {
         paths.Add(path);
     }
 
+    
 }
