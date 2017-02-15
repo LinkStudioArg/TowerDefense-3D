@@ -2,99 +2,109 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Spawner : MonoBehaviour {
-	
-	public Wave[] waves;
+public class Spawner : MonoBehaviour
+{
 
-	Wave currentWave;
+    public Wave[] waves;
 
-	public int currentAmountOfEnemies;
+    Wave currentWave;
 
-	public enum State{STANDBY, SPAWNING, FINISH}
+    public int currentAmountOfEnemies;
 
-	public State state;
+    public enum State { STANDBY, SPAWNING, FINISH }
 
-	public float time;
+    public State state;
 
-	public int waveIndex = 0;
+    public float time;
 
-	public float timeBetweenWaves = 4f;
+    public int waveIndex = 0;
 
-	void Start(){
-		scenesAlreadySpawn = 0;
-		time = 0f;
-		this.state = State.STANDBY;
-		if (waves.Length > 0) {
-			currentWave = waves [waveIndex];
-			currentAmountOfEnemies = currentWave.enemyAmount;
+    public float timeBetweenWaves = 4f;
 
-			this.state = State.SPAWNING;
-			
-		}
-	}
+    void Start()
+    {
+        scenesAlreadySpawn = 0;
+        time = 0f;
+        this.state = State.STANDBY;
+        if (waves.Length > 0)
+        {
+            currentWave = waves[waveIndex];
+            currentAmountOfEnemies = currentWave.enemyAmount;
 
-	int scenesAlreadySpawn;
+            this.state = State.SPAWNING;
 
-	void Update(){
-		
+        }
+    }
 
-		if (scenesAlreadySpawn == waves.Length) {			
-			state = State.FINISH;
-		}
-	 
-		if (state != State.FINISH) {
-			
-			if (state == State.STANDBY && currentAmountOfEnemies <= 0) {
-				time += Time.deltaTime;
+    int scenesAlreadySpawn;
 
-				if (time >= timeBetweenWaves || Input.GetKeyDown (KeyCode.N)) {
-					waveIndex++;
-					currentWave = waves [waveIndex];
-					time = 0f;
-					this.state = State.SPAWNING;
-					currentAmountOfEnemies = currentWave.enemyAmount;
-				}
-			}
+    void Update()
+    {
+        if (scenesAlreadySpawn == waves.Length)
+        {
+            state = State.FINISH;
+        }
 
-			if (state == State.SPAWNING) {
-				time += Time.deltaTime;
-				if (time >= currentWave.spawnRate && currentWave.enemyAmount > 0) {
-					time = 0f;
-					GameObject go = currentWave.SelectGameObject ();
-					Spawn (go);
-				}
-				if (currentWave.enemyAmount <= 0) {
-					scenesAlreadySpawn++;
-					state = State.STANDBY;
-				}
-			
-			}
+        if (state != State.FINISH)
+        {
 
-		}
-	}
+            if (state == State.STANDBY && currentAmountOfEnemies <= 0)
+            {
+                time += Time.deltaTime;
+
+                if (time >= timeBetweenWaves || Input.GetKeyDown(KeyCode.N))
+                {
+                    waveIndex++;
+                    currentWave = waves[waveIndex];
+                    time = 0f;
+                    this.state = State.SPAWNING;
+                    currentAmountOfEnemies = currentWave.enemyAmount;
+                }
+            }
+
+            if (state == State.SPAWNING)
+            {
+                time += Time.deltaTime;
+                if (time >= currentWave.spawnRate && currentWave.enemyAmount > 0)
+                {
+                    time = 0f;
+                    GameObject go = currentWave.SelectGameObject();
+                    Spawn(go);
+                }
+                if (currentWave.enemyAmount <= 0)
+                {
+                    scenesAlreadySpawn++;
+                    state = State.STANDBY;
+                }
+
+            }
+
+        }
+    }
 
 
 
-	void Spawn(GameObject go)
-	{
-		GameObject newGo = (GameObject)GameObject.Instantiate (go, this.transform.position, Quaternion.identity);
-		newGo.transform.SetParent (this.transform);
-		currentWave.enemyAmount--;
-	}
+    void Spawn(GameObject go)
+    {
+        GameObject newGo = (GameObject)GameObject.Instantiate(go, this.transform.position, Quaternion.identity);
+        newGo.transform.SetParent(this.transform);
+        currentWave.enemyAmount--;
+    }
 
-	[System.Serializable]
-	public struct Wave
-	{
-		public string name;
-		public GameObject[] enemies;
-		public float spawnRate;
-		public int enemyAmount;
+    [System.Serializable]
+    public struct Wave
+    {
+        public string name;
+        public GameObject[] enemies;
+        public float spawnRate;
+        public int enemyAmount;
 
-		public GameObject SelectGameObject(){
-			int index = Random.Range (0, enemies.Length);
-			return enemies [index];
-		}
-	}
+        public GameObject SelectGameObject()
+        {
+            int index = Random.Range(0, enemies.Length);
+            return enemies[index];
+        }
+    }
 
 
 }

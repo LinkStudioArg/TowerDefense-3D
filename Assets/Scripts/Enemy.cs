@@ -16,6 +16,25 @@ public class Enemy : MonoBehaviour
         public float spawnRate;
     }
 
-
     public Stats stats;
+
+     void Update()
+    {
+        CheckHealth();
+    }
+
+    void CheckHealth()
+    {
+        if (stats.hp <= 0)
+        {
+            //hacer graficos de puaj
+
+            Destroy(this.gameObject);
+        }
+    }
+
+    void OnDestroy()
+    {
+        GameObject.Find("Spawner").GetComponent<Spawner>().currentAmountOfEnemies--;
+    }
 }
