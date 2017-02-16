@@ -8,7 +8,7 @@ public class EnemyMovement : MonoBehaviour
     float vel = 10f;
     Transform Base;
     Transform target;
-    int index;
+    int wayPointIndex;
     Enemy enemyScript;
 
     [Range(0, 1)]
@@ -16,16 +16,18 @@ public class EnemyMovement : MonoBehaviour
 
     void Awake()
     {
-        enemyScript = this.GetComponent<Enemy>();
+        enemyScript = GetComponent<Enemy>();
         vel = enemyScript.stats.movementVel;
     }
 
     void Start()
     {
-        index = 0;
+        wayPointIndex = 0;
+
+        // Temporal
         LoadWaypoints();
         if (wayPoints.Length > 0)
-            target = wayPoints[index];
+            target = wayPoints[wayPointIndex];
 
         Base = GameObject.Find("Base").transform;
     }
@@ -47,10 +49,7 @@ public class EnemyMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         vel = enemyScript.stats.movementVel;
-
-        CheckHealth();
         if (wayPoints.Length > 0)
         {
             if (HasReachedTarget())
@@ -68,40 +67,24 @@ public class EnemyMovement : MonoBehaviour
 
     Transform SelectNewTarget()
     {
-        index++;
-        if (index == wayPoints.Length)
+        wayPointIndex++;
+        if (wayPointIndex == wayPoints.Length)
         {
             return Base;
         }
-        else if (index > wayPoints.Length)
+        else if (wayPointIndex > wayPoints.Length)
         {
             //Llego a la base, llamar referencia y provocar daño y destruir
 
             Destroy(this.gameObject);
             return transform;
         }
-        return wayPoints[index];
+        return wayPoints[wayPointIndex];
     }
 
     void Move()
     {
         transform.position = Vector3.MoveTowards(transform.position, target.position, vel * Time.deltaTime);
     }
-
-
-    void CheckHealth()
-    {
-        if (enemyScript.stats.hp <= 0)
-        {
-            //hacer graficos de puaj
-
-            Destroy(this.gameObject);
-        }
-    }
-
-    void OnDestroy()
-    {
-        GameObject.Find("Spawner").GetComponent<Spawner>().currentAmountOfEnemies--;
-
-    }
+    
 }

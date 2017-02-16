@@ -11,11 +11,15 @@ public class Spawner : MonoBehaviour
 
     public int currentAmountOfEnemies;
 
-    public enum State { STANDBY, SPAWNING, FINISH }
+    public enum State { STANDBY, WORKING, SPAWNING, FINISH }
+    /*
+     * STANDBY:  Waiting for next wave
+     * WORKING:  At least one coroutine is working
+     * SPAWNING: Spawning current wave
+     * FINISH:   Done spawning last wave, level done
+     */
 
     public State state;
-
-    public float time;
 
     public int waveIndex = 0;
 
@@ -23,16 +27,12 @@ public class Spawner : MonoBehaviour
 
     void Start()
     {
-        scenesAlreadySpawn = 0;
-        time = 0f;
-        this.state = State.STANDBY;
+        state = State.STANDBY;
         if (waves.Length > 0)
         {
             currentWave = waves[waveIndex];
-            currentAmountOfEnemies = currentWave.enemyAmount;
 
-            this.state = State.SPAWNING;
-
+            state = State.SPAWNING;
         }
     }
 
@@ -40,56 +40,60 @@ public class Spawner : MonoBehaviour
 
     void Update()
     {
-        if (scenesAlreadySpawn == waves.Length)
-        {
-            state = State.FINISH;
-        }
+        if (Input.GetKeyDown(KeyCode.N))
+            StopCoroutine(WaitForNextWave());
 
-        if (state != State.FINISH)
-        {
+        if (state == State.SPAWNING)
+            StartCoroutine(SpawnWave());
 
-            if (state == State.STANDBY && currentAmountOfEnemies <= 0)
-            {
-                time += Time.deltaTime;
+        if (state == State.STANDBY && currentAmountOfEnemies == 0)
+            StartCoroutine(WaitForNextWave());
 
-                if (time >= timeBetweenWaves || Input.GetKeyDown(KeyCode.N))
-                {
-                    waveIndex++;
-                    currentWave = waves[waveIndex];
-                    time = 0f;
-                    this.state = State.SPAWNING;
-                    currentAmountOfEnemies = currentWave.enemyAmount;
-                }
-            }
-
-            if (state == State.SPAWNING)
-            {
-                time += Time.deltaTime;
-                if (time >= currentWave.spawnRate && currentWave.enemyAmount > 0)
-                {
-                    time = 0f;
-                    GameObject go = currentWave.SelectGameObject();
-                    Spawn(go);
-                }
-                if (currentWave.enemyAmount <= 0)
-                {
-                    scenesAlreadySpawn++;
-                    state = State.STANDBY;
-                }
-
-            }
-
-        }
+        /* if(Base.hp <= 0)
+         *     state = State.FINISH
+         */
     }
-
 
 
     void Spawn(GameObject go)
     {
-        GameObject newGo = (GameObject)GameObject.Instantiate(go, this.transform.position, Quaternion.identity);
-        newGo.transform.SetParent(this.transform);
-        currentWave.enemyAmount--;
+        GameObject newGo = (GameObject)GameObject.Instantiate(go, transform.position, Quaternion.identity);
+        newGo.transform.SetParent(transform);
     }
+
+
+    IEnumerator SpawnWave()
+    {
+        state = State.WORKING;
+
+        for (int i = 0; i < currentWave.enemyAmount; i++)
+        {
+            GameObject go = currentWave.SelectGameObject();
+            Spawn(go);
+
+            currentAmountOfEnemies++;
+
+            yield return new WaitForSeconds(currentWave.spawnRate);
+        }
+
+        if (waveIndex < waves.Length)
+            state = State.STANDBY;
+        else
+            state = State.FINISH;
+    }
+
+    IEnumerator WaitForNextWave()
+    {
+        state = State.WORKING;
+
+        waveIndex++;
+        currentWave = waves[waveIndex];
+
+        yield return new WaitForSeconds(timeBetweenWaves);
+
+        state = State.SPAWNING;
+    }
+
 
     [System.Serializable]
     public struct Wave
