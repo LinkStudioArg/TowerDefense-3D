@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-
-    public Wave[] waves;
-
-    Wave currentWave;
-
-    public int currentAmountOfEnemies;
-
     public enum State { STANDBY, WORKING, SPAWNING, FINISH }
     /*
      * STANDBY:  Waiting for next wave
@@ -21,14 +14,23 @@ public class Spawner : MonoBehaviour
 
     public State state;
 
-    public int waveIndex = 0;
+    public List<Wave> waves;
 
-    public float timeBetweenWaves = 4f;
+    public float timeBetweenWaves = 4;
+
+
+    Wave currentWave;
+
+    [HideInInspector()]
+    public int currentAmountOfEnemies;
+
+    int waveIndex = 0;
+
 
     void Start()
     {
         state = State.STANDBY;
-        if (waves.Length > 0)
+        if (waves.Count > 0)
         {
             currentWave = waves[waveIndex];
 
@@ -76,7 +78,7 @@ public class Spawner : MonoBehaviour
             yield return new WaitForSeconds(currentWave.spawnRate);
         }
 
-        if (waveIndex < waves.Length)
+        if (waveIndex < waves.Count)
             state = State.STANDBY;
         else
             state = State.FINISH;
@@ -99,14 +101,22 @@ public class Spawner : MonoBehaviour
     public struct Wave
     {
         public string name;
-        public GameObject[] enemies;
+        public List<GameObject> enemies;
         public float spawnRate;
         public int enemyAmount;
 
         public GameObject SelectGameObject()
         {
-            int index = Random.Range(0, enemies.Length);
+            int index = Random.Range(0, enemies.Count);
             return enemies[index];
+        }
+
+        public Wave(string name, float spR, int enA)
+        {
+            this.name = name;
+            this.spawnRate = spR;
+            this.enemyAmount = enA;
+            this.enemies = new List<GameObject>();
         }
     }
 
