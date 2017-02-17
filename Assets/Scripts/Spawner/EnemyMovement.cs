@@ -46,6 +46,7 @@ public class EnemyMovement : MonoBehaviour
         wayPoints = wps;
 
     }
+
     // Update is called once per frame
     void Update()
     {

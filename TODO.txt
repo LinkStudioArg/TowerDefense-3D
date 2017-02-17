@@ -1,4 +1,0 @@
-Lucas:
-- Fix "Add Wave" button
-- Add "Remove" button next to each Wave
-- Test more thoroughly

@@ -12,19 +12,19 @@ public class Spawner : MonoBehaviour
      * FINISH:   Done spawning last wave, level done
      */
 
-    public State state;
+    public State state; // Current state of the spawner
 
-    public List<Wave> waves;
+    public List<Wave> waves; // List of the waves to spawn
 
-    public float timeBetweenWaves = 4;
+    public float timeBetweenWaves = 4; // Time between one wave being done and the next spawining
+    
 
-
-    Wave currentWave;
+    Wave currentWave; // Auxiliar variable to define the wave that is being worked on
 
     [HideInInspector()]
-    public int currentAmountOfEnemies;
+    public int currentAmountOfEnemies; // Current amount of enemies on screen at any given moment
 
-    int waveIndex = 0;
+    int waveIndex = 0; // Auxiliar variable to define the index of the wave that is being worked on
 
 
     void Start()
@@ -38,11 +38,9 @@ public class Spawner : MonoBehaviour
         }
     }
 
-    int scenesAlreadySpawn;
-
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.N))
+        if (PressedNextWaveButton()) // Function that returns if the player pressed the button to start next wave early
             StopCoroutine(WaitForNextWave());
 
         if (state == State.SPAWNING)
@@ -59,6 +57,7 @@ public class Spawner : MonoBehaviour
 
     void Spawn(GameObject go)
     {
+        // Creates a new object using the corresponding enemy prefab and sets it as child of the spawner
         GameObject newGo = (GameObject)GameObject.Instantiate(go, transform.position, Quaternion.identity);
         newGo.transform.SetParent(transform);
     }
@@ -70,6 +69,7 @@ public class Spawner : MonoBehaviour
 
         for (int i = 0; i < currentWave.enemyAmount; i++)
         {
+            // Selects an enemy prefab and spawns an enemy
             GameObject go = currentWave.SelectGameObject();
             Spawn(go);
 
@@ -78,6 +78,7 @@ public class Spawner : MonoBehaviour
             yield return new WaitForSeconds(currentWave.spawnRate);
         }
 
+        // If there are more waves to spawn go to standby, else the level is done
         if (waveIndex < waves.Count)
             state = State.STANDBY;
         else
@@ -88,29 +89,45 @@ public class Spawner : MonoBehaviour
     {
         state = State.WORKING;
 
+        // Moves to next wave
         waveIndex++;
         currentWave = waves[waveIndex];
-
+        
+        // Waits the corresponding time and sets the state to spawning
         yield return new WaitForSeconds(timeBetweenWaves);
 
         state = State.SPAWNING;
     }
 
+    bool PressedNextWaveButton()
+    {
+        // The input N is a placeholder for the player pressing the "Next Wave" button
+        return Input.GetKeyDown(KeyCode.N);
+    }
 
     [System.Serializable]
     public struct Wave
     {
+        // Wave name, used for identifying in level design
         public string name;
+
+        // List of enemy prefabs that can appear in this wave
         public List<GameObject> enemies;
+
+        // Time to wait between spawns
         public float spawnRate;
+
+        // Amount of enemies that spawn this wave
         public int enemyAmount;
 
+        // Function to select a random prefab from the enemies list
         public GameObject SelectGameObject()
         {
             int index = Random.Range(0, enemies.Count);
             return enemies[index];
         }
 
+        // Constructor
         public Wave(string name, float spR, int enA)
         {
             this.name = name;
@@ -119,6 +136,4 @@ public class Spawner : MonoBehaviour
             this.enemies = new List<GameObject>();
         }
     }
-
-
 }
