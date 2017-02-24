@@ -13,7 +13,7 @@ public class Enemy : MonoBehaviour
         public float hp;
         public float damage;
         public float shield;
-        public float spawnRate;
+        //public float spawnRate;
     }
 
     public Stats stats;

@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
-    public Transform[] wayPoints;
-    float vel = 10f;
+    Transform[] wayPoints;
+    float vel;
     Transform Base;
     Transform target;
     int wayPointIndex;
     Enemy enemyScript;
 
-    [Range(0, 1)]
-    public float distThreshold = 0.1f;
+    float distThreshold = 0.1f;
 
     void Awake()
     {

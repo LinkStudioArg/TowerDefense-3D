@@ -11,7 +11,10 @@ public class SpawnerEditor : Editor
 
     // Bool arays used for the Wave and Enemy prefabs foldouts
     protected static bool[] showSettings;
-    public static bool[] showEnemies;
+    protected static bool[] showEnemies;
+
+    public List<GameObject> prefabs;
+    public List<string> prefabNames;
 
     private void Awake()
     {
@@ -28,13 +31,41 @@ public class SpawnerEditor : Editor
             showSettings[i] = false;
             showEnemies[i] = false;
         }
+
+        //Load prefabs
+        prefabs = new List<GameObject>(Resources.LoadAll<GameObject>("Prefabs/Enemies"));
+        prefabNames = new List<string>();
+
+        for (int i = 0; i < prefabs.Count; i++)
+        {
+            prefabNames.Add(prefabs[i].name);
+        }
     }
 
     public override void OnInspectorGUI()
     {
+
         // Draw the state and time between waves as usual
         mySpawner.state = (Spawner.State)EditorGUILayout.EnumPopup("Current state: ", mySpawner.state);
         mySpawner.timeBetweenWaves = EditorGUILayout.FloatField("Time between waves: ", mySpawner.timeBetweenWaves);
+
+        GUILayout.Space(30);
+
+        int prefabIndex = 0;
+        prefabIndex = EditorGUILayout.Popup("Enemy prefabs in rotation: ", prefabIndex, prefabNames.ToArray());
+        EditorGUILayout.BeginHorizontal();
+
+        if (GUILayout.Button("Remove Prefab") && EditorUtility.DisplayDialog("Are you sure?", "Are you sure you want to remove this prefab from the rotation?", "Yes", "No"))
+        {
+            prefabs.RemoveAt(prefabIndex);
+            prefabNames.RemoveAt(prefabIndex);
+        }
+
+        if (GUILayout.Button("Add Prefab"))
+        {
+            AddNewEnemy();
+        }
+        EditorGUILayout.EndHorizontal();
 
         // Draw waves
         for (int i = 0; i < mySpawner.waves.Count; i++)
@@ -48,6 +79,11 @@ public class SpawnerEditor : Editor
             // WaveFoldout
             showSettings[i] = EditorGUILayout.Foldout(showSettings[i], wave.name);
 
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(20);
+            GUILayout.BeginVertical();
+
             if (showSettings[i])
             {
                 // Draw the name, spawn rate and enemy amount as usual
@@ -56,7 +92,11 @@ public class SpawnerEditor : Editor
                 wave.enemyAmount = EditorGUILayout.IntField("Enemies in wave: ", wave.enemyAmount);
 
                 // Enemy Foldout
-                showEnemies[i] = EditorGUILayout.Foldout(showEnemies[i], "Enemy prefabs");
+                showEnemies[i] = EditorGUILayout.Foldout(showEnemies[i], "Enemy types");
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(20);
+                GUILayout.BeginVertical();
 
                 if (showEnemies[i])
                 {
@@ -66,14 +106,11 @@ public class SpawnerEditor : Editor
                         // So the remove button appears to the left
                         EditorGUILayout.BeginHorizontal();
 
-                        // If the enemy is a defined prefab, draw it with its name, else draw it as "Empty"
-                        if (wave.enemies[j])
-                            wave.enemies[j] = (GameObject)EditorGUILayout.ObjectField(wave.enemies[j].name, wave.enemies[j], typeof(GameObject), true);
-                        else
-                            wave.enemies[j] = (GameObject)EditorGUILayout.ObjectField("Empty", null, typeof(GameObject), false);
+                        // Draw the enemy prefab selector
+                        wave.enemies[j] = DrawEnemy(wave.enemies[j]);
 
                         // Remove button
-                        if (GUILayout.Button("Remove") && EditorUtility.DisplayDialog("Are you sure?", "Are you sure you want to remove this prefab?", "Yes", "No"))
+                        if (GUILayout.Button("Remove") && EditorUtility.DisplayDialog("Are you sure?", "Are you sure you want to remove this enemy type from this wave?", "Yes", "No"))
                         {
                             wave.enemies.RemoveAt(j);
                         }
@@ -81,14 +118,17 @@ public class SpawnerEditor : Editor
                     } // End of Draw enemy prefabs
 
                     // Add new prefab to the enemies list button
-                    if (GUILayout.Button("Add New Prefab"))
+                    if (GUILayout.Button("Add New Enemy"))
                     {
-                        wave.enemies.Add(null);
+                        wave.enemies.Add(ChooseEnemy());
                     }
                 }// End of Enemy Foldout
 
+                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
+
                 // Remove Wave Button
-                if (GUILayout.Button("Remove"))
+                if (GUILayout.Button("Remove Wave"))
                 {
                     mySpawner.waves.Remove(wave);
                 }
@@ -102,7 +142,10 @@ public class SpawnerEditor : Editor
 
                     EditorUtility.SetDirty(mySpawner);
                 }
-            }
+            }// End Wave Foldout
+
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
 
             // Space between waves
             GUILayout.Space(10);
@@ -119,4 +162,43 @@ public class SpawnerEditor : Editor
             EditorUtility.SetDirty(mySpawner);
         }
     }// End of OnInspectorGUI
+
+
+    GameObject DrawEnemy(GameObject enemy)
+    {
+        int chosenIndex = -1;
+
+        for (int i = 0; i < prefabs.Count; i++)
+        {
+            if (enemy.name == prefabs[i].name)
+            {
+                chosenIndex = i;
+            }
+        }
+
+        if (chosenIndex != -1)
+        {
+            enemy = prefabs[EditorGUILayout.Popup("Prefab: ", chosenIndex, prefabNames.ToArray())];
+        }
+        else
+        {
+            //Error
+        }
+
+        return enemy;
+    }
+
+    GameObject ChooseEnemy()
+    {
+        return prefabs[0];
+    }
+
+    void AddNewEnemy()
+    {
+        Object prefab = PrefabUtility.CreateEmptyPrefab("Assets/External Tools/Main/Resources/Prefabs/Enemies/newPrefab.prefab");
+
+        GameObject go = new GameObject();
+
+        go = EnemyCreationWindow.CreateEnemy();
+    }
 }
