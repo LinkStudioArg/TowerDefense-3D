@@ -1,4 +1,2 @@
 Lucas:
-- Figure out how to create a preview for a Mesh
-- Implement mesh preview in editor window
-- Finish spawner editor
+- Comment editor code

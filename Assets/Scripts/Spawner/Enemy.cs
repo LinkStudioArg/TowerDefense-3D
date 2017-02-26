@@ -13,7 +13,15 @@ public class Enemy : MonoBehaviour
         public float hp;
         public float damage;
         public float shield;
-        //public float spawnRate;
+
+        public Stats(string _name = "", float _movVel = 1, float _hp = 1, float _dam = 0, float _shield = 0)
+        {
+            this.name = _name;
+            this.movementVel = _movVel;
+            this.hp = _hp;
+            this.damage = _dam;
+            this.shield = _shield;
+        }
     }
 
     public Stats stats;

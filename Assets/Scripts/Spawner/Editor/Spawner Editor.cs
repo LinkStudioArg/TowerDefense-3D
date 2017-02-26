@@ -13,8 +13,13 @@ public class SpawnerEditor : Editor
     protected static bool[] showSettings;
     protected static bool[] showEnemies;
 
+
     public List<GameObject> prefabs;
     public List<string> prefabNames;
+
+
+    // Paths
+    public static string enemyFolderPath = "Assets/Prefabs/Enemies";
 
     private void Awake()
     {
@@ -33,11 +38,14 @@ public class SpawnerEditor : Editor
         }
 
         //Load prefabs
-        prefabs = new List<GameObject>(Resources.LoadAll<GameObject>("Prefabs/Enemies"));
+        string[] search_results = System.IO.Directory.GetFiles(enemyFolderPath, "*.prefab", System.IO.SearchOption.AllDirectories);
+        prefabs = new List<GameObject>();
         prefabNames = new List<string>();
 
-        for (int i = 0; i < prefabs.Count; i++)
+        for (int i = 0; i < search_results.Length; i++)
         {
+            prefabs.Add(AssetDatabase.LoadAssetAtPath<GameObject>(search_results[i]));
+
             prefabNames.Add(prefabs[i].name);
         }
     }
@@ -55,17 +63,26 @@ public class SpawnerEditor : Editor
         prefabIndex = EditorGUILayout.Popup("Enemy prefabs in rotation: ", prefabIndex, prefabNames.ToArray());
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("Remove Prefab") && EditorUtility.DisplayDialog("Are you sure?", "Are you sure you want to remove this prefab from the rotation?", "Yes", "No"))
+        if (GUILayout.Button("Remove Prefab") && EditorUtility.DisplayDialog("Dummy button", "Delete not functional yet", "Ok"))
         {
-            prefabs.RemoveAt(prefabIndex);
-            prefabNames.RemoveAt(prefabIndex);
+            //AssetDatabase.MoveAssetToTrash(resourcesPath + "/" + enemyFolderPath + "/" + prefabNames[prefabIndex] + ".prefab");
+
+            //prefabs.RemoveAt(prefabIndex);
+            //prefabNames.RemoveAt(prefabIndex);
+
         }
+
+        if (GUILayout.Button("Edit Prefab"))
+        {
+            EnemyEditWindow.EditEnemy(prefabs[prefabIndex]);
+        }
+
+        EditorGUILayout.EndHorizontal();
 
         if (GUILayout.Button("Add Prefab"))
         {
-            AddNewEnemy();
+            NewPrefab();
         }
-        EditorGUILayout.EndHorizontal();
 
         // Draw waves
         for (int i = 0; i < mySpawner.waves.Count; i++)
@@ -170,9 +187,10 @@ public class SpawnerEditor : Editor
 
         for (int i = 0; i < prefabs.Count; i++)
         {
-            if (enemy.name == prefabs[i].name)
+            if (enemy.name == prefabNames[i])
             {
                 chosenIndex = i;
+                break;
             }
         }
 
@@ -182,9 +200,10 @@ public class SpawnerEditor : Editor
         }
         else
         {
+            Debug.Log("Draw Enemy error");
             //Error
         }
-
+        
         return enemy;
     }
 
@@ -193,12 +212,13 @@ public class SpawnerEditor : Editor
         return prefabs[0];
     }
 
-    void AddNewEnemy()
+    void NewPrefab()
     {
-        Object prefab = PrefabUtility.CreateEmptyPrefab("Assets/External Tools/Main/Resources/Prefabs/Enemies/newPrefab.prefab");
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        go.AddComponent<Enemy>();
+        go.AddComponent<EnemyMovement>();
 
-        GameObject go = new GameObject();
-
-        go = EnemyCreationWindow.CreateEnemy();
+        EnemyEditWindow.CreateEnemy(ref go);
+        
     }
 }

@@ -79,7 +79,7 @@ public class Spawner : MonoBehaviour
         }
 
         // If there are more waves to spawn go to standby, else the level is done
-        if (waveIndex < waves.Count)
+        if (waveIndex < waves.Count - 1)
             state = State.STANDBY;
         else
             state = State.FINISH;
