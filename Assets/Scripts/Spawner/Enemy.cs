@@ -5,6 +5,8 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
 
+    public Color color;
+
     [System.Serializable]
     public struct Stats
     {
@@ -25,6 +27,11 @@ public class Enemy : MonoBehaviour
     }
 
     public Stats stats;
+
+    void Start()
+    {
+        color = gameObject.GetComponent<MeshRenderer>().material.color;
+    }
 
      void Update()
     {

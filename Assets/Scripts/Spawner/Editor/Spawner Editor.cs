@@ -10,12 +10,13 @@ public class SpawnerEditor : Editor
     Spawner mySpawner;
 
     // Bool arays used for the Wave and Enemy prefabs foldouts
-    protected static bool[] showSettings;
-    protected static bool[] showEnemies;
+    public bool[] showSettings;
+    public bool[] showEnemies;
 
 
     public List<GameObject> prefabs;
     public List<string> prefabNames;
+    public int prefabIndex = 0;
 
 
     // Paths
@@ -59,16 +60,15 @@ public class SpawnerEditor : Editor
 
         GUILayout.Space(30);
 
-        int prefabIndex = 0;
         prefabIndex = EditorGUILayout.Popup("Enemy prefabs in rotation: ", prefabIndex, prefabNames.ToArray());
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("Remove Prefab") && EditorUtility.DisplayDialog("Dummy button", "Delete not functional yet", "Ok"))
+        if (GUILayout.Button("Remove Prefab") && EditorUtility.DisplayDialog("Are you sure?", "Are you sure you want to delete this prefab? You won't be able to undo it.", "Yes", "No"))
         {
-            //AssetDatabase.MoveAssetToTrash(resourcesPath + "/" + enemyFolderPath + "/" + prefabNames[prefabIndex] + ".prefab");
+            AssetDatabase.MoveAssetToTrash(enemyFolderPath + "/" + prefabNames[prefabIndex] + ".prefab");
 
-            //prefabs.RemoveAt(prefabIndex);
-            //prefabNames.RemoveAt(prefabIndex);
+            prefabs.RemoveAt(prefabIndex);
+            prefabNames.RemoveAt(prefabIndex);
 
         }
 

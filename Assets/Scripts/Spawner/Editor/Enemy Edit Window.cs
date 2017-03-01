@@ -64,6 +64,7 @@ public class EnemyEditWindow : EditorWindow
         {
             if (IsValidEnemy())
             {
+                go.layer = LayerMask.NameToLayer("Enemies");
                 go.name = enemy.stats.name;
                 string prefabPath = SpawnerEditor.enemyFolderPath + "/" + go.name + ".prefab";
 
@@ -88,13 +89,6 @@ public class EnemyEditWindow : EditorWindow
                 EditorUtility.DisplayDialog("Invalid Prefab", "The the stats are not valid, please correct them", "Ok");
             }
         }
-
-        if (GUILayout.Button("Test") && objectChanged)
-        {
-            Debug.Log("changed");
-        }
-        else
-            Debug.Log("not changed");
     }
 
     bool IsValidEnemy()
