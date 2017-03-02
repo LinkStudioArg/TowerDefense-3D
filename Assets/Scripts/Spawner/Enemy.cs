@@ -5,8 +5,6 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
 
-    public Color color;
-
     [System.Serializable]
     public struct Stats
     {
@@ -28,12 +26,27 @@ public class Enemy : MonoBehaviour
 
     public Stats stats;
 
-    void Start()
+    [System.Serializable]
+    public struct BaseStats
     {
-        color = gameObject.GetComponent<MeshRenderer>().material.color;
+        private float movementVel;
+
+        public BaseStats(float v)
+        {
+            movementVel = v;
+        }
+
+        public float getVelocity() { return movementVel; }
     }
 
-     void Update()
+    public BaseStats baseStats;
+
+    private void Awake()
+    {
+        baseStats = new BaseStats(stats.movementVel);
+    }
+
+    void Update()
     {
         CheckHealth();
     }
@@ -51,5 +64,10 @@ public class Enemy : MonoBehaviour
     void OnDestroy()
     {
         GameObject.Find("Spawner").GetComponent<Spawner>().currentAmountOfEnemies--;
+    }
+
+    public void TakeDamage(float dam)
+    {
+        stats.hp -= dam - stats.shield;
     }
 }

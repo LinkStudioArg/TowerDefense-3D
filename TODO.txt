@@ -1,5 +1,4 @@
 Lucas:
 - Comment editor code
-- Use coroutines in turret
-- Implement inheritence to create different kids of turrets
 - Comment turret
+- Finish freeze turret
