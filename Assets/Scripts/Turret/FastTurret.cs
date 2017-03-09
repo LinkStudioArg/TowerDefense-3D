@@ -19,7 +19,8 @@ public class FastTurret : BasicTurret
     {
         Move();
     }
-    
+
+
     protected override void Fire()
     {
         Ray r = new Ray(transform.position, transform.forward);

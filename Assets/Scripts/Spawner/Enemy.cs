@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
 
+    // This struct has the stats the enemy has at any given moment
     [System.Serializable]
     public struct Stats
     {
@@ -23,33 +24,37 @@ public class Enemy : MonoBehaviour
             this.shield = _shield;
         }
     }
-
-    public Stats stats;
-
+    
+    // This struct saves the stats the enemy has on start
     [System.Serializable]
     public struct BaseStats
     {
-        private float movementVel;
 
-        public BaseStats(float v)
+        // All variables are private, they are set in start
+        private float movementVel;
+        private float hp;
+        private float damage;
+        private float shield;
+
+        public BaseStats(Stats s)
         {
-            movementVel = v;
+            movementVel = s.movementVel;
+            hp = s.hp;
+            damage = s.damage;
+            shield = s.shield;
         }
 
+        // Get functions
         public float getVelocity() { return movementVel; }
+        public float getHP() { return hp; }
+        public float getDamage() { return damage; }
+        public float getShield() { return shield; }
     }
+
+    public Stats stats;
 
     public BaseStats baseStats;
 
-    private void Awake()
-    {
-        baseStats = new BaseStats(stats.movementVel);
-    }
-
-    void Update()
-    {
-        CheckHealth();
-    }
 
     void CheckHealth()
     {
@@ -60,14 +65,25 @@ public class Enemy : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+    
+    public void TakeDamage(float dam)
+    {
+        stats.hp -= dam - stats.shield; //The shield gives the enemy a level of resistance to all damage
+    }
+
+
+    private void Start()
+    {
+        baseStats = new BaseStats(stats);
+    }
+
+    void Update()
+    {
+        CheckHealth();
+    }
 
     void OnDestroy()
     {
         GameObject.Find("Spawner").GetComponent<Spawner>().currentAmountOfEnemies--;
-    }
-
-    public void TakeDamage(float dam)
-    {
-        stats.hp -= dam - stats.shield;
     }
 }

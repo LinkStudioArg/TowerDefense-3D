@@ -7,7 +7,7 @@ public class Spawner : MonoBehaviour
     public enum State { STANDBY, WORKING, SPAWNING, FINISH }
     /*
      * STANDBY:  Waiting for next wave
-     * WORKING:  At least one coroutine is working
+     * WORKING:  At least one coroutine is working, no other coroutine should be called
      * SPAWNING: Spawning current wave
      * FINISH:   Done spawning last wave, level done
      */
@@ -17,7 +17,7 @@ public class Spawner : MonoBehaviour
     public List<Wave> waves; // List of the waves to spawn
 
     public float timeBetweenWaves = 4; // Time between one wave being done and the next spawining
-    
+
 
     Wave currentWave; // Auxiliar variable to define the wave that is being worked on
 
@@ -29,13 +29,15 @@ public class Spawner : MonoBehaviour
 
     void Start()
     {
+        // At start the state is set to STANDBY, if there are waves, 
         state = State.STANDBY;
         if (waves.Count > 0)
         {
             currentWave = waves[waveIndex];
-
             state = State.SPAWNING;
         }
+        else
+            state = State.FINISH;
     }
 
     void Update()
@@ -43,11 +45,21 @@ public class Spawner : MonoBehaviour
         if (PressedNextWaveButton()) // Function that returns if the player pressed the button to start next wave early
             StopCoroutine(WaitForNextWave());
 
-        if (state == State.SPAWNING)
-            StartCoroutine(SpawnWave());
+        switch (state)
+        {
+            case State.STANDBY:
+                if (currentAmountOfEnemies == 0)
+                    StartCoroutine(WaitForNextWave());
+                break;
 
-        if (state == State.STANDBY && currentAmountOfEnemies == 0)
-            StartCoroutine(WaitForNextWave());
+            case State.SPAWNING:
+                StartCoroutine(SpawnWave());
+                break;
+
+            case State.FINISH:
+                Debug.Log("Level end");
+                break;
+        }
 
         /* if(Base.hp <= 0)
          *     state = State.FINISH
@@ -92,11 +104,15 @@ public class Spawner : MonoBehaviour
         // Moves to next wave
         waveIndex++;
         currentWave = waves[waveIndex];
-        
+
         // Waits the corresponding time and sets the state to spawning
         yield return new WaitForSeconds(timeBetweenWaves);
 
-        state = State.SPAWNING;
+        // If there are more waves to spawn go to spawning, else the level is done
+        if (waveIndex < waves.Count)
+            state = State.SPAWNING;
+        else
+            state = State.FINISH;
     }
 
     bool PressedNextWaveButton()
